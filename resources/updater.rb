@@ -34,10 +34,18 @@ action :update do
 
   if update_necessary?
     converge_by "Upgraded chef-client #{current_version} to #{desired_version}" do
-      windows_workaround if platform_family?('windows')
-
-      upgrade_command = Mixlib::ShellOut.new(mixlib_install.install_command)
-      upgrade_command.run_command
+      if platform_family?('windows')
+        install_script = mixlib_install.install_command
+        windows_workaround
+        powershell_script 'name' do
+          code <<-EOH
+          #{install_script}
+          EOH
+        end.run_action(:run)
+      else
+        upgrade_command = Mixlib::ShellOut.new(mixlib_install.install_command)
+        upgrade_command.run_command
+      end
       run_post_install_action
     end
   end
@@ -73,6 +81,9 @@ action_class do
     options = {
       product_name: 'chef',
       platform_version_compatibility_mode: true,
+      platform: node['platform'],
+      platform_version: node['platform_version'],
+      architecture: node['kernel']['machine'],
       channel: new_resource.channel.to_sym,
       product_version: new_resource.version == 'latest' ? :latest : new_resource.version,
 
@@ -156,8 +167,8 @@ action_class do
 
   # Windows does not like having files that are open deleted. We need to workaround that
   def windows_workaround
-    execute 'chef-move' do
+    execute 'Move chef directory' do
       command 'move c:/opscode/chef c:/opscode/chef.upgrade'
-    end
+    end.run_action(:run)
   end
 end
