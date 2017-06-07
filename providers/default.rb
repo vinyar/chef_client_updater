@@ -49,13 +49,13 @@ rescue LoadError
 end
 
 def update_rubygems
-  raise "cannot find omnibus install" unless ::File.exist?("/opt/chef/embedded/bin/gem")
-  rubygems_version = Gem::Version.new(shell_out("/opt/chef/embedded/bin/gem --version").stdout.chomp)
-  target_version = "2.6.11"
+  raise 'cannot find omnibus install' unless ::File.exist?('/opt/chef/embedded/bin/gem')
+  rubygems_version = Gem::Version.new(shell_out('/opt/chef/embedded/bin/gem --version').stdout.chomp)
+  target_version = '2.6.11'
   unless Gem::Requirement.new(">= #{target_version}").satisfied_by?(rubygems_version)
     converge_by "upgrading rubygems to #{target_version} was #{rubygems_version}" do
       # note that the rubygems that we're upgrading is likely so old that you can't pin a version
-      shell_out!("/opt/chef/embedded/bin/gem update --system --no-rdoc --no-ri")
+      shell_out!('/opt/chef/embedded/bin/gem update --system --no-rdoc --no-ri')
     end
   end
 end
