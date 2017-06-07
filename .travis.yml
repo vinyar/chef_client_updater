@@ -36,7 +36,6 @@ matrix:
       before_script:
         - eval "$(/opt/chefdk/bin/chef shell-init bash)"
         - sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
-      install: echo "skip bundle install"
       # 11.10.4 is the earliest we can test due to test-kitchen / chef-zero not supporting earlier
       # (cookbook likely supports earlier versions)
       env:
